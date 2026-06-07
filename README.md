@@ -1,6 +1,6 @@
 # .dotfiles
 
-Lean Mac setup. One repo, three scripts, no frameworks.
+Lean Mac setup. One repo, four scripts, no frameworks.
 
 | File | What |
 |---|---|
@@ -24,17 +24,18 @@ up where it left off.
 
 ## Before wiping the old Mac
 
-Run `./prewipe.sh` until it prints "All clear", then:
+Run `./prewipe.sh` until it reports all clear. Note: it stays red until this repo itself is pushed, so push early. Then:
 
 - [ ] Raycast: Settings → Advanced → Export → `.rayconfig` to NAS
 - [ ] TablePlus: Connection → Export → file to NAS (passwords are in Keychain — export is the only way)
 - [ ] Zen: sync signed in and up to date
-- [ ] iMessage backup finished on NAS
+- [ ] iMessage backup finished and verified on NAS
 - [ ] iCloud Documents/Desktop/Downloads fully synced
 - [ ] `git -C ~/.dotfiles push` — this repo itself
 
 ## After bootstrap (new Mac)
 
+- [ ] NAS mounted? Finder → Cmd-K → smb://192.168.100.250 — then re-run bootstrap if the restore step was skipped
 - [ ] Raycast: import `.rayconfig` from NAS
 - [ ] TablePlus: import connections from NAS
 - [ ] Sign in: Zen sync, App Store, Docker, Figma, Spotify, Discord
