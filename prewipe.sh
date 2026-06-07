@@ -64,10 +64,12 @@ if ! nas_mounted; then
 else
   if mkdir -p "$DEST/ssh" \
      && cp -p "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
-              "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub "$DEST/ssh/" \
+              "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub \
+              "$HOME"/.ssh/config.local "$DEST/ssh/" \
      && cmp -s "$HOME/.ssh/github_ed25519" "$DEST/ssh/github_ed25519" \
-     && cmp -s "$HOME/.ssh/hetzner_ed25519" "$DEST/ssh/hetzner_ed25519"; then
-    ok "4 key files copied + verified -> $DEST/ssh/"
+     && cmp -s "$HOME/.ssh/hetzner_ed25519" "$DEST/ssh/hetzner_ed25519" \
+     && cmp -s "$HOME/.ssh/config.local" "$DEST/ssh/config.local"; then
+    ok "4 key files + config.local copied + verified -> $DEST/ssh/"
   else
     fail "SSH key copy to NAS FAILED — do not wipe until this is green"
   fi

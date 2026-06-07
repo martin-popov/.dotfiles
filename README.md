@@ -59,4 +59,4 @@ Run `./prewipe.sh` until it reports all clear. Note: it stays red until this rep
 
 Synology "SNAS" `192.168.100.250`, SMB mount `/Volumes/homes`.
 Migration files: `/Volumes/homes/martinpopov/MacMigration/2026-06/`
-(`ssh/` keys, `claude-memory/`, Raycast + TablePlus exports.)
+(`ssh/` keys + `config.local` (private host IPs — untracked), `claude-memory/`, Raycast + TablePlus exports.)

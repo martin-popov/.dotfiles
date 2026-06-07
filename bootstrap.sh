@@ -67,6 +67,7 @@ if [[ -d "$SRC" ]]; then
     cp -p "$SRC/ssh/"* "$HOME/.ssh/"
     chmod 600 "$HOME"/.ssh/*_ed25519
     chmod 644 "$HOME"/.ssh/*.pub
+    [[ -f "$HOME/.ssh/config.local" ]] && chmod 600 "$HOME/.ssh/config.local"
     echo "SSH keys restored."
   fi
   if [[ -d "$SRC/claude-memory" ]]; then

@@ -21,7 +21,7 @@
 | Rust | Official rustup installer (sh.rustup.rs, `-y --no-modify-path`) — brew's rustup is keg-only, cargo would never reach PATH. |
 | bun | Dropped. Reinstall later if a project needs it. |
 | nvim | Stock, zero config. Aliased `vim=nvim`. |
-| SSH keys | Copy `github_ed25519` + `hetzner_ed25519` (priv+pub) to NAS, restore on new Mac. `ssh/config` tracked in repo. |
+| SSH keys | Copy `github_ed25519` + `hetzner_ed25519` (priv+pub) to NAS, restore on new Mac. `ssh/config` tracked in repo (github.com block only + Include of untracked `~/.ssh/config.local` holding private host IPs; config.local rides to the NAS with the keys). |
 | Apps kept | Zed, Zen, Karabiner-Elements, Raycast, iTerm2, TablePlus, Docker, Figma, Affinity (v3 unified), Spotify, Discord, VLC, Stremio, Obsidian, Hidden Bar, AnyDesk, Xcode (+ xcode-build-server), Claude Code. |
 | Apps dropped | Gaming/3D (Steam, Minecraft, PCSX2, Whisky, Godot, Unity, Blender), Notion, NordVPN, Viscosity, QMK Toolbox, FL Studio, Claude desktop, Bruno/Postman/Yaak, nmap, dotnet. |
 | Mechanism | Plain repo + explicit symlink script (`install.sh`). No stow, no bare repo, no chezmoi. |

@@ -1,17 +1,6 @@
+Include ~/.ssh/config.local
+
 Host github.com
   AddKeysToAgent yes
   UseKeychain yes
   IdentityFile ~/.ssh/github_ed25519
-
-Host arsov
-  # HostName 10.254.246.210
-  HostName 10.254.246.220
-  user arsov
-  port 22
-
-Host hetzner
-  HostName 167.233.47.128
-  User root
-  IdentityFile ~/.ssh/hetzner_ed25519
-  AddKeysToAgent yes
-  UseKeychain yes

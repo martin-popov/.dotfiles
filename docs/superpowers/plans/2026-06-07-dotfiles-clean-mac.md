@@ -181,6 +181,8 @@ defaults export com.googlecode.iterm2 iterm2/com.googlecode.iterm2.plist
 
 (`defaults export` instead of `cp` for iTerm2 so the cfprefsd cache is flushed and the plist is current. Only `settings.json`/`keymap.json` from zed — `themes/` is empty and `prompts/` is a binary library DB, per spec.)
 
+(Post-review: ssh/config was later split — tracked file keeps only github.com + an Include of untracked ~/.ssh/config.local carrying private host IPs; see prewipe/bootstrap for its NAS round-trip.)
+
 - [ ] **Step 2: Verify copies are identical**
 
 Run:
@@ -421,10 +423,12 @@ if ! nas_mounted; then
 else
   if mkdir -p "$DEST/ssh" \
      && cp -p "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
-              "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub "$DEST/ssh/" \
+              "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub \
+              "$HOME"/.ssh/config.local "$DEST/ssh/" \
      && cmp -s "$HOME/.ssh/github_ed25519" "$DEST/ssh/github_ed25519" \
-     && cmp -s "$HOME/.ssh/hetzner_ed25519" "$DEST/ssh/hetzner_ed25519"; then
-    ok "4 key files copied + verified -> $DEST/ssh/"
+     && cmp -s "$HOME/.ssh/hetzner_ed25519" "$DEST/ssh/hetzner_ed25519" \
+     && cmp -s "$HOME/.ssh/config.local" "$DEST/ssh/config.local"; then
+    ok "4 key files + config.local copied + verified -> $DEST/ssh/"
   else
     fail "SSH key copy to NAS FAILED — do not wipe until this is green"
   fi
@@ -564,6 +568,7 @@ if [[ -d "$SRC" ]]; then
     cp -p "$SRC/ssh/"* "$HOME/.ssh/"
     chmod 600 "$HOME"/.ssh/*_ed25519
     chmod 644 "$HOME"/.ssh/*.pub
+    [[ -f "$HOME/.ssh/config.local" ]] && chmod 600 "$HOME/.ssh/config.local"
     echo "SSH keys restored."
   fi
   if [[ -d "$SRC/claude-memory" ]]; then
@@ -666,7 +671,7 @@ Run `./prewipe.sh` until it reports all clear. Note: it stays red until this rep
 
 Synology "SNAS" `192.168.100.250`, SMB mount `/Volumes/homes`.
 Migration files: `/Volumes/homes/martinpopov/MacMigration/2026-06/`
-(`ssh/` keys, `claude-memory/`, Raycast + TablePlus exports.)
+(`ssh/` keys + `config.local` (private host IPs — untracked), `claude-memory/`, Raycast + TablePlus exports.)
 ````
 
 - [ ] **Step 2: Commit**
