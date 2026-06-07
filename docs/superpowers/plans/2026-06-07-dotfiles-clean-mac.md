@@ -373,23 +373,40 @@ ok()   { printf '  \033[32m+ %s\033[0m\n' "$1"; }
 # -d alone is fooled by a stale local dir under /Volumes; check the mount table
 nas_mounted() { mount | grep -q ' on /Volumes/homes (' && [[ -d "$NAS" ]]; }
 
+# regenerable junk: neither audited nor swept to the NAS
+CACHE_RE='(^|/)(node_modules|\.next|dist|build|target|vendor|\.venv|__pycache__|\.DS_Store|Library|DerivedData|tmp|\.husky|\.astro)(/|$)|\.tsbuildinfo$|\.xcuserstate$|(^|/)\.lock-waf|(^|/)\.waf3-'
+
 audit_repo() {
-  local dir="$1" name="$2" bad=0 out n
+  local dir="$1" name="$2" bad=0 out n f src dst swept sfail
   out="$(git -C "$dir" status --porcelain 2>/dev/null)" || { fail "$name: git status failed"; bad=1; }
   [[ -n "$out" ]] && { fail "$name: uncommitted or untracked changes"; bad=1; }
   out="$(git -C "$dir" log --branches --tags HEAD --not --remotes --oneline 2>/dev/null)" || { fail "$name: git log failed"; bad=1; }
   [[ -n "$out" ]] && { fail "$name: unpushed commits or tags (or no remote)"; bad=1; }
   out="$(git -C "$dir" stash list 2>/dev/null)" || { fail "$name: git stash failed"; bad=1; }
   [[ -n "$out" ]] && { fail "$name: stashes present"; bad=1; }
-  # gitignored files exist ONLY on this disk — git/GitHub won't save them
+  # gitignored files exist ONLY on this disk — sweep them to the NAS and verify;
+  # only a failed/impossible sweep keeps them red
   out="$(git -C "$dir" ls-files --others --ignored --exclude-standard 2>/dev/null \
-        | grep -vE '(^|/)(node_modules|\.next|dist|build|target|vendor|\.venv|__pycache__|\.DS_Store)(/|$)')"
+        | grep -vE "$CACHE_RE")"
   if [[ -n "$out" ]]; then
     n=$(echo "$out" | wc -l | tr -d ' ')
-    fail "$name: $n gitignored-only file(s) (won't survive the wipe):"
-    echo "$out" | head -5 | sed 's/^/      /'
-    [[ $n -gt 5 ]] && echo "      ... and $((n-5)) more"
-    bad=1
+    if ! nas_mounted; then
+      fail "$name: $n gitignored-only file(s) NOT swept — NAS unmounted:"
+      echo "$out" | head -5 | sed 's/^/      /'
+      [[ $n -gt 5 ]] && echo "      ... and $((n-5)) more"
+      bad=1
+    else
+      swept=0 sfail=0
+      while IFS= read -r f; do
+        src="$dir/$f" dst="$DEST/developer/$name/$f"
+        if mkdir -p "$(dirname "$dst")" && cp -Xp "$src" "$dst" && cmp -s "$src" "$dst"; then
+          swept=$((swept+1))
+        else
+          fail "$name: sweep FAILED: $f"; sfail=1; bad=1
+        fi
+      done <<< "$out"
+      [[ $sfail -eq 0 ]] && ok "$name: $swept gitignored file(s) swept + verified -> NAS"
+    fi
   fi
   # submodule commits/stashes can be local-only even when the superproject is green
   if [[ -f "$dir/.gitmodules" ]]; then
@@ -422,7 +439,7 @@ if ! nas_mounted; then
   fail "NAS not mounted at $NAS — Finder: Cmd-K smb://192.168.100.250, then re-run"
 else
   if mkdir -p "$DEST/ssh" \
-     && cp -p "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
+     && cp -Xp "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
               "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub \
               "$HOME"/.ssh/config.local "$DEST/ssh/" \
      && cmp -s "$HOME/.ssh/github_ed25519" "$DEST/ssh/github_ed25519" \

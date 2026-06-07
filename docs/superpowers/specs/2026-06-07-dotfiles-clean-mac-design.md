@@ -135,8 +135,9 @@ Note: verify cask names at implementation time (`brew info --cask <name>`); e.g.
 
 `set -euo pipefail`; every step logs; NAS steps verify `/Volumes/homes/martinpopov` is mounted before copying and fail loudly otherwise. Read-only except for copies TO the NAS.
 
-1. **Repo audit** — for each dir in `~/Developer`:
-   - git repo → report uncommitted changes, untracked files, unpushed branches, stashes
+1. **Repo audit + sweep** — for each dir in `~/Developer`:
+   - git repo → report uncommitted changes, untracked files, unpushed commits/tags, stashes, dirty submodules
+   - gitignored-only files (minus regenerable caches: node_modules, Unity Library, .husky, .astro, tmp, build artifacts) → swept to `MacMigration/2026-06/developer/<repo>/` and cmp-verified; only failed sweeps stay red
    - non-git dir → flag "not on GitHub — back up to NAS or lose"
 2. **SSH keys → NAS** — `~/.ssh/{github,hetzner}_ed25519{,.pub}` → `MacMigration/2026-06/ssh/`
 3. **Claude memory → NAS** — `~/.claude/projects/*/memory/` → `MacMigration/2026-06/claude-memory/`
