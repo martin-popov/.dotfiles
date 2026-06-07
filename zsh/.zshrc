@@ -12,6 +12,10 @@ source <(fzf --zsh)
 export EDITOR=nvim
 alias vim=nvim
 
+# ls
+export CLICOLOR=1   # colored ls (BSD)
+alias l='ls -lah'
+
 # history
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=50000
