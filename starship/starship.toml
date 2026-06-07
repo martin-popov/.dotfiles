@@ -1,0 +1,3 @@
+# Starship prompt — https://starship.rs/config/
+# Defaults are good; add overrides here when needed.
+command_timeout = 1000
