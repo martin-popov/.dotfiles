@@ -33,6 +33,7 @@
 ├── README.md          # restore checklist, top to bottom
 ├── bootstrap.sh       # one-shot new-Mac setup (idempotent)
 ├── install.sh         # symlinks configs into place (called by bootstrap; --dry-run flag)
+├── macos.sh           # system settings via `defaults write` (called by bootstrap)
 ├── prewipe.sh         # run BEFORE wiping: repo audit + NAS copies
 ├── Brewfile
 ├── zsh/
@@ -102,6 +103,8 @@ brew "rustup"
 # swift/xcode
 brew "xcode-build-server"
 brew "mas"
+# macos setup
+brew "dockutil"
 
 # apps
 cask "zed"
@@ -147,16 +150,40 @@ Idempotent; safe to re-run after a failure.
 2. Clone `git@github.com:martin-popov/.dotfiles.git` to `~/.dotfiles` (or HTTPS first, switch remote after SSH keys restored)
 3. `brew bundle --file ~/.dotfiles/Brewfile`
 4. `./install.sh`
-5. Toolchains: `rustup default stable` · `fnm install --lts && fnm default lts-latest` · pnpm standalone installer (`curl -fsSL https://get.pnpm.io/install.sh | sh -`) · `uv python install`
-6. `mas install 497799835` (Xcode; requires App Store sign-in — prompt user first)
-7. Restore from NAS (if mounted): SSH keys → `~/.ssh/` with `chmod 600`, Claude memory → `~/.claude/projects/<same-project-dir-name-as-backed-up>/memory/` (the backup preserves the project dir names)
-8. Print the manual post-restore checklist
+5. `./macos.sh` — system settings (see below)
+6. Toolchains: `rustup default stable` · `fnm install --lts && fnm default lts-latest` · pnpm standalone installer (`curl -fsSL https://get.pnpm.io/install.sh | sh -`) · `uv python install`
+7. `mas install 497799835` (Xcode; requires App Store sign-in — prompt user first)
+8. Restore from NAS (if mounted): SSH keys → `~/.ssh/` with `chmod 600`, Claude memory → `~/.claude/projects/<same-project-dir-name-as-backed-up>/memory/` (the backup preserves the project dir names)
+9. Print the manual post-restore checklist
+
+## macos.sh (system settings)
+
+Curated `defaults write` lines reproducing the current machine's non-default settings, ending with `killall Dock Finder`. Values captured 2026-06-07 from the old Mac:
+
+| Domain | Setting | Value |
+|---|---|---|
+| NSGlobalDomain | `KeyRepeat` / `InitialKeyRepeat` | 2 / 15 (fast repeat) |
+| NSGlobalDomain | `AppleKeyboardUIMode` | 2 (keyboard UI navigation) |
+| com.apple.dock | `autohide` / `autohide-delay` | true / 0 (instant) |
+| com.apple.dock | `tilesize` / `magnification` | 93 / true |
+| com.apple.dock | `mru-spaces` | false (don't rearrange Spaces) |
+| com.apple.dock | `show-recents` | false |
+| com.apple.dock | `minimize-to-application` | true |
+| com.apple.dock | `wvous-br-corner` | 1 (bottom-right hot corner disabled) |
+| com.apple.finder | `ShowPathbar` | true |
+| com.apple.finder | `FXPreferredViewStyle` | `Nlsv` (list view) |
+| com.apple.finder | `_FXSortFoldersFirst` | true |
+| com.apple.finder | `NewWindowTarget` | `PfDe` (new windows → Desktop) |
+
+Dock contents via dockutil: `dockutil --remove all --no-restart`, then `--add` Zen and Zed.
 
 ## Manual checklist (README)
 
 **Before wipe:** run `prewipe.sh` until clean · export Raycast `.rayconfig` → NAS · export TablePlus connections → NAS (passwords live in Keychain; export is the only way to keep them) · confirm Zen sync signed in · finish iMessage backup · confirm iCloud (Documents/Desktop/Downloads) fully synced.
 
 **After bootstrap:** import Raycast config · import TablePlus connections · sign into: Zen sync, App Store, Docker, Figma, Spotify, Discord, Obsidian (vault is in iCloud — opens once iCloud syncs) · `claude` login · launch Karabiner-Elements + grant input permissions · iTerm2 picks up prefs from repo folder automatically (set by install.sh) · add restored SSH key to ssh-agent (`ssh-add --apple-use-keychain`).
+
+**System Settings (manual, not scriptable):** Apple ID / iCloud sign-in + **Desktop & Documents sync ON** (backup philosophy depends on it) · disable Spotlight's ⌘Space shortcut so Raycast can take it · default browser → Zen · Language & Region (Bulgarian formats) + input sources · Touch ID · FileVault · screen-lock timing · login items / start-at-login: Karabiner-Elements, Hidden Bar, Raycast.
 
 ## Error handling
 
@@ -174,7 +201,6 @@ Idempotent; safe to re-run after a failure.
 
 ## Out of scope
 
-- macOS `defaults write` system tweaks (add later if wanted)
 - Zen profile copying (sync covers it)
 - nvim config (stock by decision)
 - Photos/iMessage backup pipelines (already handled separately on the NAS)
