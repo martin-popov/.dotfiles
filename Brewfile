@@ -15,7 +15,6 @@ brew "zsh-autosuggestions"
 brew "fnm"
 brew "uv"
 brew "go"
-brew "rustup"
 # swift/xcode
 brew "xcode-build-server"
 brew "mas"
@@ -41,5 +40,3 @@ cask "stremio"
 cask "hiddenbar"
 cask "anydesk"
 cask "font-jetbrains-mono-nerd-font"
-
-mas "Xcode", id: 497799835

@@ -18,7 +18,7 @@
 | Node | fnm + pnpm (pnpm via standalone installer, NOT brew — brew formula drags in brew node). |
 | Python | uv only. No brew python, no pipx. |
 | Go | brew `go` (replaces manual `/usr/local/go` install). |
-| Rust | brew `rustup`, then `rustup default stable`. |
+| Rust | Official rustup installer (sh.rustup.rs, `-y --no-modify-path`) — brew's rustup is keg-only, cargo would never reach PATH. |
 | bun | Dropped. Reinstall later if a project needs it. |
 | nvim | Stock, zero config. Aliased `vim=nvim`. |
 | SSH keys | Copy `github_ed25519` + `hetzner_ed25519` (priv+pub) to NAS, restore on new Mac. `ssh/config` tracked in repo. |
@@ -92,6 +92,8 @@ brew "ripgrep"
 brew "fzf"
 brew "tree"
 brew "neovim"
+brew "lazygit"
+brew "sql-formatter"
 # shell
 brew "starship"
 brew "zsh-autosuggestions"
@@ -99,7 +101,6 @@ brew "zsh-autosuggestions"
 brew "fnm"
 brew "uv"
 brew "go"
-brew "rustup"
 # swift/xcode
 brew "xcode-build-server"
 brew "mas"
@@ -122,11 +123,9 @@ cask "spotify"
 cask "discord"
 cask "vlc"
 cask "stremio"
-cask "hidden-bar"
+cask "hiddenbar"
 cask "anydesk"
 cask "font-jetbrains-mono-nerd-font"
-
-mas "Xcode", id: 497799835
 ```
 
 Note: verify cask names at implementation time (`brew info --cask <name>`); e.g. `claude-code` falls back to the native installer (`curl -fsSL https://claude.ai/install.sh | bash`) if the cask doesn't exist, and `docker-desktop` is the current name for the old `docker` cask.
@@ -151,7 +150,7 @@ Idempotent; safe to re-run after a failure.
 3. `brew bundle --file ~/.dotfiles/Brewfile`
 4. `./install.sh`
 5. `./macos.sh` — system settings (see below)
-6. Toolchains: `rustup default stable` · `fnm install --lts && fnm default lts-latest` · pnpm standalone installer (`curl -fsSL https://get.pnpm.io/install.sh | sh -`) · `uv python install`
+6. Toolchains: official rustup installer (if missing) · `fnm install --lts && fnm default lts-latest` · pnpm static binary → `~/Library/pnpm` · `uv python install`
 7. `mas install 497799835` (Xcode; requires App Store sign-in — prompt user first)
 8. Restore from NAS (if mounted): SSH keys → `~/.ssh/` with `chmod 600`, Claude memory → `~/.claude/projects/<same-project-dir-name-as-backed-up>/memory/` (the backup preserves the project dir names)
 9. Print the manual post-restore checklist

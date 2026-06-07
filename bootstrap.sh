@@ -18,6 +18,8 @@ fi
 
 step "Homebrew"
 if ! command -v brew >/dev/null 2>&1 && [[ ! -x /opt/homebrew/bin/brew ]]; then
+  # piped stdin makes brew's installer NONINTERACTIVE; prime sudo first or it aborts
+  sudo -v
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -39,10 +41,18 @@ step "macOS settings"
 "$DOTFILES/macos.sh"
 
 step "Toolchains"
-rustup default stable
+# official rustup (brew's is keg-only: cargo would never land on PATH)
+if [[ ! -x "$HOME/.cargo/bin/rustup" ]]; then
+  curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path
+fi
 fnm install --lts
 fnm default lts-latest
-command -v pnpm >/dev/null 2>&1 || curl -fsSL https://get.pnpm.io/install.sh | sh -
+# pnpm binary directly — its installer would append PATH lines through the ~/.zshrc symlink
+if [[ ! -x "$HOME/Library/pnpm/pnpm" ]]; then
+  mkdir -p "$HOME/Library/pnpm"
+  curl -fsSL https://github.com/pnpm/pnpm/releases/latest/download/pnpm-macos-arm64 -o "$HOME/Library/pnpm/pnpm"
+  chmod +x "$HOME/Library/pnpm/pnpm"
+fi
 uv python install
 
 step "Xcode (App Store)"
