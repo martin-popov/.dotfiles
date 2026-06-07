@@ -41,6 +41,7 @@ step "macOS settings"
 "$DOTFILES/macos.sh"
 
 step "Toolchains"
+git lfs install
 # official rustup (brew's is keg-only: cargo would never land on PATH)
 if [[ ! -x "$HOME/.cargo/bin/rustup" ]]; then
   curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path

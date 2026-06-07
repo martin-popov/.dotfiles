@@ -126,6 +126,7 @@ cask "stremio"
 cask "hiddenbar"
 cask "anydesk"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-jetbrains-mono"
 ```
 
 Note: verify cask names at implementation time (`brew info --cask <name>`); e.g. `claude-code` falls back to the native installer (`curl -fsSL https://claude.ai/install.sh | bash`) if the cask doesn't exist, and `docker-desktop` is the current name for the old `docker` cask.

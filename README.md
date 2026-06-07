@@ -42,7 +42,7 @@ Run `./prewipe.sh` until it reports all clear. Note: it stays red until this rep
 - [ ] Obsidian: vault lives in iCloud — opens once iCloud syncs
 - [ ] `claude` → login
 - [ ] Zed: sign into GitHub Copilot again (token lives in Keychain, doesn't survive wipe)
-- [ ] Karabiner-Elements: launch once, grant input-monitoring permissions
+- [ ] Karabiner-Elements: launch once, grant input-monitoring permissions. (GUI edits replace the symlink — re-run install.sh after changing keybinds in the GUI)
 - [ ] `ssh-add --apple-use-keychain ~/.ssh/github_ed25519` (and hetzner)
 - [ ] iTerm2: prefs load from `~/.dotfiles/iterm2` automatically (set by install.sh)
 
