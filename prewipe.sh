@@ -11,16 +11,36 @@ say()  { printf '\n\033[1m%s\033[0m\n' "$1"; }
 fail() { printf '  \033[31mx %s\033[0m\n' "$1"; ISSUES=$((ISSUES+1)); }
 ok()   { printf '  \033[32m+ %s\033[0m\n' "$1"; }
 
+# -d alone is fooled by a stale local dir under /Volumes; check the mount table
+nas_mounted() { mount | grep -q ' on /Volumes/homes (' && [[ -d "$NAS" ]]; }
+
 audit_repo() {
-  local dir="$1" name="$2" bad=0
-  if [[ -n "$(git -C "$dir" status --porcelain 2>/dev/null)" ]]; then
-    fail "$name: uncommitted or untracked changes"; bad=1
+  local dir="$1" name="$2" bad=0 out n
+  out="$(git -C "$dir" status --porcelain 2>/dev/null)" || { fail "$name: git status failed"; bad=1; }
+  [[ -n "$out" ]] && { fail "$name: uncommitted or untracked changes"; bad=1; }
+  out="$(git -C "$dir" log --branches --tags HEAD --not --remotes --oneline 2>/dev/null)" || { fail "$name: git log failed"; bad=1; }
+  [[ -n "$out" ]] && { fail "$name: unpushed commits or tags (or no remote)"; bad=1; }
+  out="$(git -C "$dir" stash list 2>/dev/null)" || { fail "$name: git stash failed"; bad=1; }
+  [[ -n "$out" ]] && { fail "$name: stashes present"; bad=1; }
+  # gitignored files exist ONLY on this disk — git/GitHub won't save them
+  out="$(git -C "$dir" ls-files --others --ignored --exclude-standard 2>/dev/null \
+        | grep -vE '(^|/)(node_modules|\.next|dist|build|target|vendor|\.venv|__pycache__|\.DS_Store)(/|$)')"
+  if [[ -n "$out" ]]; then
+    n=$(echo "$out" | wc -l | tr -d ' ')
+    fail "$name: $n gitignored-only file(s) (won't survive the wipe):"
+    echo "$out" | head -5 | sed 's/^/      /'
+    [[ $n -gt 5 ]] && echo "      ... and $((n-5)) more"
+    bad=1
   fi
-  if [[ -n "$(git -C "$dir" log --branches --not --remotes --oneline 2>/dev/null)" ]]; then
-    fail "$name: unpushed commits (or no remote)"; bad=1
-  fi
-  if [[ -n "$(git -C "$dir" stash list 2>/dev/null)" ]]; then
-    fail "$name: stashes present"; bad=1
+  # submodule commits/stashes can be local-only even when the superproject is green
+  if [[ -f "$dir/.gitmodules" ]]; then
+    out="$(git -C "$dir" submodule foreach --quiet --recursive '
+      s=$(git status --porcelain 2>/dev/null)
+      u=$(git log --branches --tags HEAD --not --remotes --oneline 2>/dev/null)
+      st=$(git stash list 2>/dev/null)
+      [ -n "$s$u$st" ] && echo "$displaypath" || :
+    ' 2>/dev/null)"
+    [[ -n "$out" ]] && { fail "$name: submodule(s) with local-only state: $(echo "$out" | tr '\n' ' ')"; bad=1; }
   fi
   [[ $bad -eq 0 ]] && ok "$name"
 }
@@ -39,28 +59,39 @@ say "2/5 Auditing ~/.dotfiles itself"
 audit_repo "$HOME/.dotfiles" ".dotfiles"
 
 say "3/5 SSH keys -> NAS"
-if [[ ! -d "$NAS" ]]; then
+if ! nas_mounted; then
   fail "NAS not mounted at $NAS — Finder: Cmd-K smb://192.168.100.250, then re-run"
 else
-  mkdir -p "$DEST/ssh"
-  cp -p "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
-        "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub "$DEST/ssh/"
-  ok "4 key files -> $DEST/ssh/"
+  if mkdir -p "$DEST/ssh" \
+     && cp -p "$HOME"/.ssh/github_ed25519 "$HOME"/.ssh/github_ed25519.pub \
+              "$HOME"/.ssh/hetzner_ed25519 "$HOME"/.ssh/hetzner_ed25519.pub "$DEST/ssh/" \
+     && cmp -s "$HOME/.ssh/github_ed25519" "$DEST/ssh/github_ed25519" \
+     && cmp -s "$HOME/.ssh/hetzner_ed25519" "$DEST/ssh/hetzner_ed25519"; then
+    ok "4 key files copied + verified -> $DEST/ssh/"
+  else
+    fail "SSH key copy to NAS FAILED — do not wipe until this is green"
+  fi
 fi
 
 say "4/5 Claude memory -> NAS"
-if [[ -d "$NAS" ]]; then
-  copied=0
+if ! nas_mounted; then
+  fail "NAS not mounted — Claude memory not copied"
+else
+  copied=0 cpfail=0
   for mem in "$HOME"/.claude/projects/*/memory; do
     [[ -d "$mem" ]] || continue
     proj="$(basename "$(dirname "$mem")")"
-    mkdir -p "$DEST/claude-memory/$proj"
-    cp -Rp "$mem" "$DEST/claude-memory/$proj/"
-    copied=$((copied+1))
+    if mkdir -p "$DEST/claude-memory/$proj" && cp -Rp "$mem" "$DEST/claude-memory/$proj/"; then
+      copied=$((copied+1))
+    else
+      fail "Claude memory copy FAILED: $proj"; cpfail=1
+    fi
   done
-  ok "$copied project memory dir(s) -> $DEST/claude-memory/"
-else
-  fail "NAS not mounted — Claude memory not copied"
+  if [[ $copied -gt 0 && $cpfail -eq 0 ]]; then
+    ok "$copied project memory dir(s) -> $DEST/claude-memory/"
+  elif [[ $copied -eq 0 ]]; then
+    fail "no Claude memory dirs copied — expected at least one"
+  fi
 fi
 
 say "5/5 Manual items (cannot be scripted)"
