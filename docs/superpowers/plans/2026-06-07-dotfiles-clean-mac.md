@@ -609,7 +609,7 @@ Lean Mac setup. One repo, three scripts, no frameworks.
 
 | File | What |
 |---|---|
-| `Brewfile` | every formula/cask + Xcode via mas |
+| `Brewfile` | every formula/cask (Xcode itself is installed by bootstrap via `mas`) |
 | `install.sh` | symlinks configs into place (`--dry-run` supported) |
 | `macos.sh` | system settings via `defaults write` + Dock via dockutil |
 | `prewipe.sh` | OLD Mac: audit repos, copy SSH keys + Claude memory to NAS |
