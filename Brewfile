@@ -6,6 +6,8 @@ brew "ripgrep"
 brew "fzf"
 brew "tree"
 brew "neovim"
+brew "lazygit"
+brew "sql-formatter"
 # shell
 brew "starship"
 brew "zsh-autosuggestions"

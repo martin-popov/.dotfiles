@@ -36,6 +36,8 @@ brew "ripgrep"
 brew "fzf"
 brew "tree"
 brew "neovim"
+brew "lazygit"
+brew "sql-formatter"
 # shell
 brew "starship"
 brew "zsh-autosuggestions"
@@ -499,6 +501,7 @@ brew bundle --file "$DOTFILES/Brewfile"
 
 step "Symlinks"
 "$DOTFILES/install.sh"
+mkdir -p "$HOME/Developer"   # iTerm2 profile's working directory
 
 step "macOS settings"
 "$DOTFILES/macos.sh"
@@ -604,6 +607,7 @@ Run `./prewipe.sh` until it prints "All clear", then:
 - [ ] Sign in: Zen sync, App Store, Docker, Figma, Spotify, Discord
 - [ ] Obsidian: vault lives in iCloud — opens once iCloud syncs
 - [ ] `claude` → login
+- [ ] Zed: sign into GitHub Copilot again (token lives in Keychain, doesn't survive wipe)
 - [ ] Karabiner-Elements: launch once, grant input-monitoring permissions
 - [ ] `ssh-add --apple-use-keychain ~/.ssh/github_ed25519` (and hetzner)
 - [ ] iTerm2: prefs load from `~/.dotfiles/iterm2` automatically (set by install.sh)
