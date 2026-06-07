@@ -82,7 +82,7 @@ Expected: prints the formula/cask/mas names, exit 0. Any "Invalid Brewfile" erro
 
 ```bash
 git -C ~/.dotfiles add Brewfile
-git -C ~/.dotfiles commit -m "Add Brewfile: 17 formulae, 18 casks, Xcode via mas"
+git -C ~/.dotfiles commit -m "Add Brewfile: 16 formulae, 18 casks, Xcode via mas"
 ```
 
 ---

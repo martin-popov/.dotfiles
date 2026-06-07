@@ -1,0 +1,43 @@
+# CLI
+brew "git"
+brew "gh"
+brew "git-lfs"
+brew "ripgrep"
+brew "fzf"
+brew "tree"
+brew "neovim"
+# shell
+brew "starship"
+brew "zsh-autosuggestions"
+# toolchains
+brew "fnm"
+brew "uv"
+brew "go"
+brew "rustup"
+# swift/xcode
+brew "xcode-build-server"
+brew "mas"
+# macos setup
+brew "dockutil"
+
+# apps
+cask "zed"
+cask "iterm2"
+cask "docker-desktop"
+cask "tableplus"
+cask "figma"
+cask "claude-code"
+cask "affinity"
+cask "zen"
+cask "raycast"
+cask "karabiner-elements"
+cask "obsidian"
+cask "spotify"
+cask "discord"
+cask "vlc"
+cask "stremio"
+cask "hiddenbar"
+cask "anydesk"
+cask "font-jetbrains-mono-nerd-font"
+
+mas "Xcode", id: 497799835
