@@ -26,12 +26,12 @@ defaults write com.apple.finder NewWindowTarget -string "PfDe"
 
 # dock contents: Zen + Zed only
 if command -v dockutil >/dev/null 2>&1; then
-  dockutil --remove all --no-restart
+  dockutil --remove all --no-restart || true
   [[ -d /Applications/Zen.app ]] && dockutil --add /Applications/Zen.app --no-restart
   [[ -d /Applications/Zed.app ]] && dockutil --add /Applications/Zed.app --no-restart
 else
   echo "dockutil not installed — skipping Dock contents"
 fi
 
-killall Dock Finder
+killall Dock Finder || true
 echo "macOS settings applied."
